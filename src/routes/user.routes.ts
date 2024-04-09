@@ -2,7 +2,7 @@ import { CreateRouter } from '../middleware/request-handler.middleware';
 import { Request, RequestHandler, Response } from 'express';
 import { createDonorSchema, validateDonorSchema } from '../helpers/validations/donor.validation';
 import { UserRepository } from '../repositories/user.repository';
-import { IDonor, IUser } from '../models/yarona-models';
+import { IDonor, IUser,  } from '../models/yarona-models';
 import { successResponse } from '../helpers/functions';
 import { HttpStatusCode } from 'axios';
 import { getUserSchema } from '../helpers/validations/user.validation';

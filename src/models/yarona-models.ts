@@ -44,7 +44,13 @@ export interface IDonor extends Document {
   validation_status: boolean;
 }
 
-// Define Mongoose schemas
+export interface IDonorPoints extends Document {
+  donor_id: Schema.Types.ObjectId;
+  total_points: number;
+  last_updated: Date;
+
+}
+// Define Mongoose  schemas
 const DonationCenterSchema = new Schema<IDonationCenter>({
   center_name: String
 });
@@ -91,7 +97,15 @@ const DonorSchema = new Schema<IDonor>({
   validation_status: { type: Boolean, default: false }
 });
 
+const DonorPointsSchema = new Schema<IDonorPoints>({
+  donor_id: {type: Schema.Types.ObjectId,ref: 'User' },
+  total_points: { type: Number, default: 0 }, // Total points accumulated by the donor
+  last_updated: { type: Date, default: Date.now }
+
+});
+DonorPointsSchema.index({donor_id: 1}, {unique: true});
 DonorSchema.index({ identification: 1 }, { unique: true });
+
 
 // Define models
 const DonationCenter = mongoose.model<IDonationCenter>('DonationCenter', DonationCenterSchema);
@@ -100,5 +114,6 @@ const Appointment = mongoose.model<IAppointment>('Appointment', AppointmentSchem
 const BloodRequest = mongoose.model<IBloodRequest>('BloodRequest', BloodRequestSchema);
 const BloodDonation = mongoose.model<IBloodDonation>('BloodDonation', BloodDonationSchema);
 const Donor = mongoose.model<IDonor>('Donor', DonorSchema);
+const DonorPoints = mongoose.model<IDonorPoints>('DonorPoints',DonorPointsSchema );
 
-export { DonationCenter, User, Appointment, BloodRequest, BloodDonation, Donor };
+export { DonationCenter, User, Appointment, BloodRequest, BloodDonation, Donor, DonorPoints };
