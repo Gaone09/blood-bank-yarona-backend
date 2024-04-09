@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createUserSchema } from '../helpers/validations/user.validation';
 import { createDonorSchema, validateDonorSchema } from '../helpers/validations/donor.validation';
-import { Donor, IDonor, IUser, User } from '../models/yarona-models';
+import { Donor, DonorPoints, IDonorPoints, IDonor, IUser, User } from '../models/yarona-models';
 import mongoose, { Document, Schema, ClientSession } from 'mongoose';
 import { GenericError } from '../helpers/error-classes';
 import { HttpStatusCode } from 'axios';
@@ -60,6 +60,17 @@ const verifyDonor = async (verifyDonorBody: z.infer<typeof validateDonorSchema>)
     return true;
   }
   return false;
+};
+
+const initializeDonorPoints = async (user_id: string, session: ClientSession): Promise<void>  =>{
+  const intialPoints= 0;
+
+  //create,update donor points for the donor
+  await DonorPoints.findOneAndUpdate(
+    {donor_id:user_id},
+    {$setOnInsert: {donor_id: user_id, total_points: initializeDonorPoints, last_updated: new Date()}},
+    {upsert: true, session}
+  );
 };
 
 export const UserRepository = { createUserAndDonor, getUser, verifyDonor };
