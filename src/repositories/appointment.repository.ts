@@ -1,4 +1,4 @@
-import { Appointment } from '../models/yarona-models';
+import { Appointment, IAppointment } from '../models/yarona-models';
 import { z } from 'zod';
 import {
   appointmentSchema,
@@ -15,7 +15,7 @@ const createAppointment = async (appointmentData: z.infer<typeof appointmentSche
   return true;
 };
 
-const getAppointment = async (appointmentQuery: z.infer<typeof getAppointmentSchema>) => {
+const getAppointment = async (appointmentQuery: z.infer<typeof getAppointmentSchema>): Promise<IAppointment[]> => {
   let query = Appointment.find();
   if (appointmentQuery.user_id) {
     query = query.where('user_id', appointmentQuery.user_id);

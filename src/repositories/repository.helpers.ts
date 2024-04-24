@@ -1,4 +1,6 @@
-import { IBloodDonation, IDonationCenter } from '../models/yarona-models';
+import { IAppointment, IBloodDonation, IDonationCenter } from '../models/yarona-models';
+import { GenericError } from '../helpers/error-classes';
+import { HttpStatusCode } from 'axios';
 
 export interface IDonationCenterStats {
   center_id: string;
@@ -12,6 +14,15 @@ export interface IDonationCenterStats {
   B_NEGATIVE: number;
   O_POSITIVE: number;
   O_NEGATIVE: number;
+}
+
+export interface IAppointmentData {
+  _id: string;
+  center_name: string;
+  center_id: string;
+  user_id: string;
+  appointment_date: Date;
+  status: boolean;
 }
 
 export const calculateDonationCenterStats = (
@@ -78,4 +89,30 @@ export const calculateDonationCenterStats = (
 
 export const extractIdsFromDonationCenters = (donationCenters: IDonationCenter[]): string[] => {
   return donationCenters.map((center) => center._id);
+};
+
+export const addCenterNameToAppointments = (
+  donationCenters: IDonationCenter[],
+  appointments: IAppointment[]
+): IAppointmentData[] => {
+  const adjustedAppointments: IAppointmentData[] = [];
+
+  appointments.forEach((appointment) => {
+    const center: IDonationCenter[] = donationCenters.filter(
+      (donationCenter) => donationCenter._id == appointment.center_id
+    );
+    if (center.length === 0) {
+      throw new GenericError('Could not find matching center', HttpStatusCode.UnprocessableEntity);
+    }
+    adjustedAppointments.push({
+      _id: appointment._id,
+      center_name: center[0].center_name,
+      center_id: appointment.center_id,
+      user_id: appointment.user_id,
+      appointment_date: appointment.appointment_date,
+      status: appointment.status
+    });
+  });
+
+  return adjustedAppointments;
 };

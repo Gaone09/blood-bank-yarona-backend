@@ -13,6 +13,8 @@ import { HttpStatusCode } from 'axios';
 import { successResponse } from '../helpers/functions';
 import { UserRepository } from '../repositories/user.repository';
 import { DonationCenterRepository } from '../repositories/donation-center.repository';
+import { IAppointment } from '../models/yarona-models';
+import { addCenterNameToAppointments } from '../repositories/repository.helpers';
 
 const AppointmentRoutes = CreateRouter();
 
@@ -41,7 +43,7 @@ const createAppointment: RequestHandler = async (req: Request, res: Response) =>
 const getUserAppointment: RequestHandler = async (req: Request, res: Response) => {
   const appointmentQuery = getUserAppointmentSchema.parse(req.query);
 
-  const appointments = await AppointmentRepository.getAppointment(appointmentQuery);
+  const appointments: IAppointment[] = await AppointmentRepository.getAppointment(appointmentQuery);
 
   if (appointments.length === 0) throw new NotFoundError('Appointment not found');
 
@@ -52,9 +54,13 @@ const getCenterAppointment: RequestHandler = async (req: Request, res: Response)
 
   const appointments = await AppointmentRepository.getAppointment(appointmentQuery);
 
-  if (appointments.length === 0) throw new NotFoundError('Appointment not found');
+  const getCenters = await DonationCenterRepository.getDonationCenters({});
 
-  return successResponse(res, HttpStatusCode.Ok, 'Appointment(s) found', appointments);
+  const adjustedAppointments = addCenterNameToAppointments(getCenters, appointments);
+
+  if (adjustedAppointments.length === 0) throw new NotFoundError('Appointment not found');
+
+  return successResponse(res, HttpStatusCode.Ok, 'Appointment(s) found', adjustedAppointments);
 };
 
 const getAppointment: RequestHandler = async (req: Request, res: Response) => {
@@ -62,9 +68,13 @@ const getAppointment: RequestHandler = async (req: Request, res: Response) => {
 
   const appointments = await AppointmentRepository.getAppointment(appointmentQuery);
 
-  if (appointments.length === 0) throw new NotFoundError('Appointment not found');
+  const getCenters = await DonationCenterRepository.getDonationCenters({});
 
-  return successResponse(res, HttpStatusCode.Ok, 'Appointment(s) found', appointments);
+  const adjustedAppointments = addCenterNameToAppointments(getCenters, appointments);
+
+  if (adjustedAppointments.length === 0) throw new NotFoundError('Appointment not found');
+
+  return successResponse(res, HttpStatusCode.Ok, 'Appointment(s) found', adjustedAppointments);
 };
 
 const updateAppointment: RequestHandler = async (req: Request, res: Response) => {
