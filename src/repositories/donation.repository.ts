@@ -23,7 +23,7 @@ const getBloodDonation = async (
   bloodDonationQuery?: z.infer<typeof getBloodDonationSchema>,
   donor_id?: string,
   is_donatable?: boolean,
-  has_been_transfused_or_disposed?: boolean
+  has_been_transfused?: boolean
 ): Promise<IBloodDonation[]> => {
   let query = BloodDonation.find();
   if (bloodDonationQuery) {
@@ -38,11 +38,8 @@ const getBloodDonation = async (
   if (donor_id) {
     query = query.where('donor_id', donor_id);
   }
-  if (is_donatable !== undefined) {
-    query.where('is_donatable', is_donatable);
-  }
-  if (has_been_transfused_or_disposed !== undefined) {
-    query.where('has_been_transfused_or_disposed', has_been_transfused_or_disposed);
+  if (has_been_transfused !== undefined) {
+    query.where('has_been_transfused', has_been_transfused);
   }
 
   query = query.select('-__v');
@@ -58,8 +55,7 @@ const getCenterBloodDonations = async (center_id: string[]): Promise<IBloodDonat
   } else {
     query = BloodDonation.find({ center_id: { $in: center_id } });
   }
-  query = query.where('is_donatable', true);
-  query = query.where('has_been_transfused_or_disposed', false);
+  query = query.where('has_been_transfused', false);
   query = query.select('-__v');
   return query.exec();
 };
@@ -85,10 +81,10 @@ const updateBloodDonationResults = async (
 
 const transfuseBlood = async (transfuseBloodQuery: z.infer<typeof transfuseBloodSchema>): Promise<boolean> => {
   const result: mongoose.UpdateWriteOpResult = await BloodDonation.updateOne(
-    { _id: transfuseBloodQuery.donation_id, has_been_transfused_or_disposed: false },
+    { _id: transfuseBloodQuery.donation_id, has_been_transfused: false },
     {
       $set: {
-        has_been_transfused_or_disposed: true
+        has_been_transfused: true
       }
     }
   );
@@ -99,7 +95,7 @@ const transfuseBlood = async (transfuseBloodQuery: z.infer<typeof transfuseBlood
 const getDonationCenterStats = async (donationStatsQuery: z.infer<typeof getCenterStatsSchema>) => {
   const matchStage: any = {
     is_donatable: true,
-    has_been_transfused_or_disposed: false
+    has_been_transfused: false
   };
   if (donationStatsQuery.center_id) {
     matchStage.$match.center_id = donationStatsQuery.center_id;
