@@ -45,9 +45,13 @@ const getUserAppointment: RequestHandler = async (req: Request, res: Response) =
 
   const appointments: IAppointment[] = await AppointmentRepository.getAppointment(appointmentQuery);
 
-  if (appointments.length === 0) throw new NotFoundError('Appointment not found');
+  const getCenters = await DonationCenterRepository.getDonationCenters({});
 
-  return successResponse(res, HttpStatusCode.Ok, 'Appointment(s) found', appointments);
+  const adjustedAppointments = addCenterNameToAppointments(getCenters, appointments);
+
+  if (adjustedAppointments.length === 0) throw new NotFoundError('Appointment not found');
+
+  return successResponse(res, HttpStatusCode.Ok, 'Appointment(s) found', adjustedAppointments);
 };
 const getCenterAppointment: RequestHandler = async (req: Request, res: Response) => {
   const appointmentQuery = getCenterAppointmentSchema.parse(req.query);
