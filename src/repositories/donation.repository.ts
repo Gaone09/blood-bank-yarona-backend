@@ -55,6 +55,9 @@ const getCenterBloodDonations = async (center_id: string[]): Promise<IBloodDonat
   } else {
     query = BloodDonation.find({ center_id: { $in: center_id } });
   }
+  query = query.where('HIV', false);
+  query = query.where('syphilis', false);
+  query = query.where('blood_results', true);
   query = query.where('has_been_transfused', false);
   query = query.select('-__v');
   return query.exec();
